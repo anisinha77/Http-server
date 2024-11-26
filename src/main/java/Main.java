@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,10 +20,25 @@ public class Main {
        serverSocket.setReuseAddress(true);
 
        try(Socket socket = serverSocket.accept()){
-           OutputStream outputStream = socket.getOutputStream();
-           String response = "HTTP/1.1 200 OK\r\n\r\n";;
-           outputStream.write(response.getBytes());
-           outputStream.flush();
+           BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+           String request = bufferedReader.readLine();
+
+           if(request != null){
+               String[] requestParts = request.split(" ");
+               OutputStream outputStream = socket.getOutputStream();
+               if(requestParts.length >=2 && "GET".equals(requestParts[0])){
+                   String path = requestParts[1];
+                   String response;
+                   if("/".equals(path)){
+                       response = "HTTP/1.1 200 OK\r\n\r\n";;
+                   }
+                   else{
+                       response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                   }
+                   outputStream.write(response.getBytes());
+                   outputStream.flush();
+               }
+           }
        }
        catch (IOException e){
            System.out.println("Exception : "+e);
