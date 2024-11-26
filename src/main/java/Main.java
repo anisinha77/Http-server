@@ -30,13 +30,28 @@ public class Main {
                    String path = requestParts[1];
                    String response;
                    if("/".equals(path)){
-                       response = "HTTP/1.1 200 OK\r\n\r\n";;
+                       response = "HTTP/1.1 200 OK\r\n\r\n";
+                       outputStream.write(response.getBytes());
+                       outputStream.flush();
+                   }
+                   else if(path.startsWith("/echo/")){
+                       String str = path.substring("/echo/".length());
+                       byte[] responseBody = str.getBytes();
+                       String responseHeaders = String.format(
+                               "HTTP/1.1 200 OK\r\n" +
+                                       "Content-Type: text/plain\r\n" +
+                                       "Content-Length: %d\r\n\r\n",
+                               responseBody.length);
+
+                       outputStream.write(responseHeaders.getBytes());
+                       outputStream.write(responseBody);
+                       outputStream.flush();
                    }
                    else{
                        response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                       outputStream.write(response.getBytes());
+                       outputStream.flush();
                    }
-                   outputStream.write(response.getBytes());
-                   outputStream.flush();
                }
            }
        }
